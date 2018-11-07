@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:mulexml="http://www.mulesoft.org/schema/mule/xml" xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:quartz="http://www.mulesoft.org/schema/mule/quartz" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/quartz http://www.mulesoft.org/schema/mule/quartz/current/mule-quartz.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/xml http://www.mulesoft.org/schema/mule/xml/current/mule-xml.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+    <quartz:connector name="Quartz" validateConnections="true" doc:name="Quartz"/>
+    <file:connector name="File" autoDelete="true" streaming="true" validateConnections="true" doc:name="File"/>
+    <jms:activemq-connector name="Active_MQ" username="admin" password="admin" brokerURL="tcp://localhost:61616" validateConnections="true" doc:name="Active MQ"/>
+    <flow name="getBillsFileRecordFlow">
+        
+        <file:inbound-endpoint path="C:\CapaIntegracion\ContabMicroFocus\bills\inputs" moveToDirectory="C:\CapaIntegracion\ContabMicroFocus\bills\processed" responseTimeout="10000" doc:name="File"/>
+        <object-to-string-transformer doc:name="Object to String"/>
+        <logger message="JSON: #[payload]" level="INFO" doc:name="Logger"/>
+        <json:json-to-xml-transformer doc:name="JSON to XML"/>
+        <logger message="XML:  #[payload]" level="INFO" doc:name="Logger"/>
+        <jms:outbound-endpoint queue="jms/ERPSAP/queue" connector-ref="Active_MQ" doc:name="JMS"/>
+     </flow>
+     
+     <flow name="getInvoicesFileRecordFlow">
+        
+        <file:inbound-endpoint path="C:\CapaIntegracion\ContabMicroFocus\invoices\inputs" moveToDirectory="C:\CapaIntegracion\ContabMicroFocus\invoices\processed" responseTimeout="10000" doc:name="File"/>
+        <logger message="JSON: #[payload]" level="INFO" doc:name="Logger"/>
+        <json:json-to-xml-transformer doc:name="JSON to XML"/>
+        <logger message="XML:  #[payload]" level="INFO" doc:name="Logger"/>
+        <jms:outbound-endpoint queue="jms/ERPSAP/queue" connector-ref="Active_MQ" doc:name="JMS"/>
+     </flow>
+     
+     <flow name="getReceiptsFileRecordFlow">
+        
+        <file:inbound-endpoint path="C:\CapaIntegracion\ContabMicroFocus\receipts\inputs" moveToDirectory="C:\CapaIntegracion\ContabMicroFocus\receipts\processed" responseTimeout="10000" doc:name="File"/>
+        <logger message="JSON: #[payload]" level="INFO" doc:name="Logger"/>
+        <json:json-to-xml-transformer doc:name="JSON to XML"/>
+        <logger message="XML:  #[payload]" level="INFO" doc:name="Logger"/>
+        <jms:outbound-endpoint queue="jms/ERPSAP/queue" connector-ref="Active_MQ" doc:name="JMS"/>
+     </flow>
+</mule>
